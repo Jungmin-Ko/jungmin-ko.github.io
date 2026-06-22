@@ -1,11 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<title>test</title>
+<meta charset="utf-8">
+
+<script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+
+<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
-<body>
-    Hello!
+
+<body style="margin:0; overflow:hidden;">
+
+<a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    arjs="sourceType: webcam;">
+
+    <a-camera position="0 0 0"></a-camera>
+
+    <a-image
+        src="ar-demo/Vault_Boy_artwork.png"
+        position="0 10 -30"
+        width="8"
+        height="8"
+        animation="
+            property: position;
+            from: -5 10 -30;
+            to: 5 10 -30;
+            dur: 10000;
+            loop: true;
+            dir: alternate;">
+    </a-image>
+
+</a-scene>
+
 </body>
-
 </html>
-
