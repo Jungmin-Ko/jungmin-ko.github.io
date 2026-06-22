@@ -4,20 +4,57 @@
 <meta charset="utf-8">
 
 <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
-
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+<style>
+    #speechBubble {
+        position: fixed;
+
+        transform: translate(-50%, -100%);
+        pointer-events: none;
+
+        background: white;
+        color: black;
+
+        padding: 12px 18px;
+
+        border-radius: 20px;
+
+        font-size: 18px;
+        font-weight: bold;
+
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+
+        z-index: 9999;
+
+        display: none;
+
+        max-width: 260px;
+
+        text-align: center;
+    }
+
+    #speechBubble::after {
+        content: "";
+
+        position: absolute;
+
+        bottom: -10px;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid white;
+    }
+</style>
+
 </head>
 
 <body style="margin:0; overflow:hidden;">
+<div id="speechBubble"></div>
 
-<a-text
-    id="speech"
-    value="여기는 63빌딩"
-    position="0 9 -15"
-    align="center"
-    color="white"
-    width="20">
-</a-text>
 
 <a-scene
     embedded
@@ -26,58 +63,168 @@
 
     <a-camera position="0 0 0"></a-camera>
 
-    <a-image
-        id="vaultboy"
-        src="ar-demo/Vault_Boy_artwork.png"
-        position="0 10 -30"
-        width="5"
-        height="5">
-    </a-image>
 
     <a-image
+        id="vaultboy"
+        look-at-camera-y
+        src="ar-demo/Vault_Boy_artwork.png"
+        position="0 10 -15"
+        width="5"
+        height="5"
+        material="side: double">
+    </a-image>
+
+    <!-- <a-image
         id="bubble"
         src="ar-demo/speech_bubble.png"
         position="0 9 -15"
         width="8"
         height="4">
-    </a-image>
+    </a-image> -->
 
 </a-scene>
 
 <script>
+
     const vaultBoy = document.querySelector('#vaultboy');
-    const speech = document.querySelector('#speech');
 
-    function moveRandomly() {
+    const bubble = document.querySelector('#speechBubble');
 
-        const x = (Math.random() * 10) - 5;
-        const y = 3 + Math.random() * 5;
-        const z = -10 - Math.random() * 10;
+    const scene = document.querySelector('a-scene');
+
+    const camera = document.querySelector('a-camera');
+
+    AFRAME.registerComponent(
+    'look-at-camera-y', {
+
+        tick: function () {
+
+            const camera =
+                document.querySelector('[camera]');
+
+            if (!camera) return;
+
+            const camPos =
+                camera.object3D.position;
+
+            const myPos =
+                this.el.object3D.position;
+
+            this.el.object3D.lookAt(
+                camPos.x,
+                myPos.y,
+                camPos.z
+            );
+        }
+    });
+
+    function wait(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function updateBubblePosition() {
+
+        if (!vaultBoy.object3D) {
+            requestAnimationFrame(updateBubblePosition);
+            return;
+        }
+
+        const objectPos = new THREE.Vector3();
+
+        vaultBoy.object3D.getWorldPosition(objectPos);
+
+        // 머리 위로 올리기
+
+        objectPos.y += 7;
+
+        const cam =
+            scene.camera;
+
+        if (!cam) {
+            requestAnimationFrame(updateBubblePosition);
+            return;
+        }
+
+        const projected =
+            objectPos.clone().project(cam);
+
+        const x =
+            (projected.x * 0.5 + 0.5)
+            * window.innerWidth;
+
+        const y =
+            (-projected.y * 0.5 + 0.5)
+            * window.innerHeight;
+
+        bubble.style.left =
+            `${x}px`;
+
+        bubble.style.top =
+            `${y}px`;
+
+        requestAnimationFrame(updateBubblePosition);
+    }
+
+
+    async function playScenario() {
+
+        // 등장
 
         vaultBoy.setAttribute(
             'animation',
             `
             property: position;
-            to: ${x} ${y} ${z};
-            dur: 5000;
-            easing: easeInOutQuad;
+            to: 0 2 -15;
+            dur: 3000;
+            easing: easeOutQuad;
             `
         );
 
-        speech.setAttribute(
+        await wait(3500);
+
+        // 첫 대사
+
+        bubble.innerText =
+            '안녕! 여기는 63빌딩이야!';
+
+        bubble.style.display = 'block';
+
+        await wait(3000);
+
+        // 두번째 대사
+
+        bubble.innerText =
+            '서울 전망이 정말 멋지지?';
+
+        await wait(3000);
+
+        // 세번째 대사
+
+        bubble.innerText =
+            '사진도 한 장 찍어봐!';
+
+        await wait(3000);
+
+        // 말풍선 제거
+
+        bubble.style.display = 'none';
+
+        // 오른쪽 위로 비행
+
+        vaultBoy.setAttribute(
             'animation',
             `
             property: position;
-            to: ${x} ${y + 4} ${z};
+            to: 20 15 -25;
             dur: 5000;
-            easing: easeInOutQuad;
+            easing: easeInQuad;
             `
         );
     }
 
-    moveRandomly();
+    playScenario();
+    updateBubblePosition();
 
-    setInterval(moveRandomly, 5000);
 </script>
 
 </body>
