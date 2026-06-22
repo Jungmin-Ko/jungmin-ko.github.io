@@ -10,6 +10,15 @@
 
 <body style="margin:0; overflow:hidden;">
 
+<a-text
+    id="speech"
+    value="여기는 63빌딩"
+    position="0 9 -15"
+    align="center"
+    color="white"
+    width="20">
+</a-text>
+
 <a-scene
     embedded
     vr-mode-ui="enabled: false"
@@ -18,20 +27,58 @@
     <a-camera position="0 0 0"></a-camera>
 
     <a-image
+        id="vaultboy"
         src="ar-demo/Vault_Boy_artwork.png"
         position="0 10 -30"
+        width="5"
+        height="5">
+    </a-image>
+
+    <a-image
+        id="bubble"
+        src="ar-demo/speech_bubble.png"
+        position="0 9 -15"
         width="8"
-        height="8"
-        animation="
-            property: position;
-            from: -5 10 -30;
-            to: 5 10 -30;
-            dur: 10000;
-            loop: true;
-            dir: alternate;">
+        height="4">
     </a-image>
 
 </a-scene>
+
+<script>
+    const vaultBoy = document.querySelector('#vaultboy');
+    const speech = document.querySelector('#speech');
+
+    function moveRandomly() {
+
+        const x = (Math.random() * 10) - 5;
+        const y = 3 + Math.random() * 5;
+        const z = -10 - Math.random() * 10;
+
+        vaultBoy.setAttribute(
+            'animation',
+            `
+            property: position;
+            to: ${x} ${y} ${z};
+            dur: 5000;
+            easing: easeInOutQuad;
+            `
+        );
+
+        speech.setAttribute(
+            'animation',
+            `
+            property: position;
+            to: ${x} ${y + 4} ${z};
+            dur: 5000;
+            easing: easeInOutQuad;
+            `
+        );
+    }
+
+    moveRandomly();
+
+    setInterval(moveRandomly, 5000);
+</script>
 
 </body>
 </html>
